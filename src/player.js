@@ -1,0 +1,70 @@
+class Player {
+  constructor(ctx, difficulty) {
+    this.ctx = ctx;
+    this.difficulty = difficulty;
+    this.x = 100;
+    this.y = 100;
+    this.width = 20;
+    this.height = 20;
+    this.speed = 200;
+    this.keys = {};
+
+    this.setupControls();
+  }
+
+  setupControls() {
+    document.addEventListener("keydown", (e) => {
+      this.keys[e.code] = true;
+    });
+
+    document.addEventListener("keyup", (e) => {
+      this.keys[e.code] = false;
+    });
+  }
+
+  update(deltaTime) {
+    let dt;
+
+    switch (this.difficulty) {
+      case "easy":
+        dt = deltaTime / 700;
+        break;
+      case "normal":
+        dt = deltaTime / 1000;
+        break;
+      case "hard":
+        dt = deltaTime / 2000;
+        break;
+      default:
+        dt = deltaTime / 1000;
+    }
+
+    if (this.keys["ArrowUp"] || this.keys["KeyW"]) {
+      this.y -= this.speed * dt;
+    }
+    if (this.keys["ArrowDown"] || this.keys["KeyS"]) {
+      this.y += this.speed * dt;
+    }
+    if (this.keys["ArrowLeft"] || this.keys["KeyA"]) {
+      this.x -= this.speed * dt;
+    }
+    if (this.keys["ArrowRight"] || this.keys["KeyD"]) {
+      this.x += this.speed * dt;
+    }
+
+    const borderOffset = 10;
+    this.x = Math.max(
+      borderOffset + 2,
+      Math.min(this.ctx.canvas.width - borderOffset - this.width - 2, this.x)
+    );
+    this.y = Math.max(
+      borderOffset + 2,
+      Math.min(this.ctx.canvas.height - borderOffset - this.height - 2, this.y)
+    );
+  }
+
+  render() {
+    this.ctx.fillStyle = "#ddff00";
+    this.ctx.fillRect(this.x, this.y, this.width, this.height);
+  }
+}
