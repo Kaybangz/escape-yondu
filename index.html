@@ -7,7 +7,29 @@
     <link rel="stylesheet" href="styles/index.css" />
   </head>
   <body>
-    <canvas id="canvas"></canvas>
-    <script src="src/main.js"></script>
+    <main class="canvas-container">
+      <!-- Start Screen Overlay -->
+      <div id="startScreen" class="start-screen">
+        <div class="content-wrapper">
+          <h1 class="game-title">ESCAPE YONDU</h1>
+          <p class="game-subtitle">
+            Navigate through the maze and avoid the arrow at all cost.<br />
+            Can you escape Yondu's wrath?
+          </p>
+          <div class="actions">
+            <button id="startButton" class="start-button">Start Game</button>
+            <div class="difficulty-select">
+              <label for="difficulty">Choose difficulty:</label>
+              <select name="difficulty" id="difficulty"></select>
+            </div>
+            <a href="" class="instructions-link">Instructions</a>
+          </div>
+        </div>
+      </div>
+      <canvas id="canvas"></canvas>
+    </main>
+    <script defer src="src/player.js"></script>
+    <script defer src="src/game.js"></script>
+    <script defer src="src/main.js"></script>
   </body>
 </html>
