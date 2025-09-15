@@ -8,6 +8,8 @@ class Game {
     this.startScreen = document.getElementById("startScreen");
     this.startButton = document.getElementById("startButton");
     this.difficultyDropdown = document.getElementById("difficulty");
+    this.gameOverScreen = document.getElementById("gameOverScreen");
+    this.pauseScreen = document.getElementById("pauseScreen");
 
     this.player = null;
 
@@ -20,7 +22,6 @@ class Game {
   init() {
     this.setupEventListeners();
     this.showStartScreen();
-    console.log("GameManager initialized");
   }
 
   setupEventListeners() {
@@ -32,6 +33,7 @@ class Game {
 
     document.addEventListener("keydown", (e) => this.handleMenuKeys(e));
     this.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+    window.addEventListener("blur", () => this.handleWindowBlur());
   }
 
   handleMenuKeys(e) {
@@ -45,9 +47,37 @@ class Game {
       case "playing":
         if (e.code === "Escape") {
           e.preventDefault();
+          this.pauseGame();
+        }
+        break;
+      case "paused":
+        if (e.code === "Escape" || e.code === "Space") {
+          e.preventDefault();
+          this.resumeGame();
+        }
+        break;
+      case "victory":
+        if (e.code === "Enter") {
+          e.preventDefault();
           this.restartGame();
         }
         break;
+      case "gameOver":
+        if (e.code === "Space" || e.code === "Enter") {
+          e.preventDefault();
+          this.restartGame();
+        }
+        if (e.code === "Escape") {
+          e.preventDefault();
+          this.showStartScreen();
+        }
+        break;
+    }
+  }
+
+  handleWindowBlur() {
+    if (this.gameState === "playing") {
+      this.pauseGame();
     }
   }
 
@@ -62,6 +92,32 @@ class Game {
   initializeGameObjects() {
     this.difficulty = this.difficultyDropdown.value;
     this.player = new Player(this.ctx, this.difficulty);
+  }
+
+  pauseGame() {
+    if (this.gameState !== "playing") return;
+    this.gameState = "paused";
+    this.showPauseScreen();
+  }
+
+  resumeGame() {
+    if (this.gameState !== "paused") return;
+    this.gameState = "playing";
+    this.hideAllScreens();
+    this.lastTime = performance.now();
+    this.gameLoop();
+  }
+
+  gameOver() {
+    this.gameState = "gameOver";
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+    setTimeout(() => {
+      this.showGameOverScreen();
+    }, 1000);
+    console.log("Game Over!");
   }
 
   restartGame() {
@@ -145,9 +201,27 @@ class Game {
     });
   }
 
+  showPauseScreen() {
+    if (this.pauseScreen) {
+      this.pauseScreen.classList.remove("hidden");
+    }
+  }
+
+  showGameOverScreen() {
+    if (this.gameOverScreen) {
+      this.gameOverScreen.classList.remove("hidden");
+    }
+  }
+
   hideAllScreens() {
     if (this.startScreen) {
       this.startScreen.classList.add("hidden");
+    }
+    if (this.pauseScreen) {
+      this.pauseScreen.classList.add("hidden");
+    }
+    if (this.gameOverScreen) {
+      this.gameOverScreen.classList.add("hidden");
     }
   }
 }

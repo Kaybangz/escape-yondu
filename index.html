@@ -26,6 +26,23 @@
           </div>
         </div>
       </div>
+      <!-- Pause Screen Overlay -->
+      <div id="pauseScreen" class="pause-screen hidden">
+        <div>
+          <h2>PAUSED</h2>
+          <p>Press <span>ESC</span> or <span>SPACE</span> to resume</p>
+        </div>
+      </div>
+      <!-- Game Over Screen Overlay -->
+      <div id="gameOverScreen" class="game-over-screen hidden">
+        <div>
+          <h2>GAME OVER</h2>
+          <p>
+            Press <span>SPACE</span> to restart or <span>ESC</span> for main
+            menu
+          </p>
+        </div>
+      </div>
       <canvas id="canvas"></canvas>
     </main>
     <script defer src="src/player.js"></script>

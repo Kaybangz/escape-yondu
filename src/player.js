@@ -27,16 +27,16 @@ class Player {
 
     switch (this.difficulty) {
       case "easy":
-        dt = deltaTime / 700;
+        dt = deltaTime / 1300;
         break;
       case "normal":
-        dt = deltaTime / 1000;
+        dt = deltaTime / 1700;
         break;
       case "hard":
-        dt = deltaTime / 2000;
+        dt = deltaTime / 2300;
         break;
       default:
-        dt = deltaTime / 1000;
+        dt = deltaTime / 1700;
     }
 
     if (this.keys["ArrowUp"] || this.keys["KeyW"]) {
