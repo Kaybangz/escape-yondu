@@ -9,7 +9,26 @@ class Player {
     this.speed = 200;
     this.keys = {};
 
+    this.sprite = new Image();
+    this.spriteLoaded = false;
+
+    this.loadSprite();
     this.setupControls();
+  }
+
+  loadSprite() {
+    this.sprite.onload = () => {
+      this.spriteLoaded = true;
+      this.width = 30;
+      this.height = 30;
+    };
+
+    this.sprite.onerror = () => {
+      console.error("Failed to load player sprite");
+      this.spriteLoaded = false;
+    };
+
+    this.sprite.src = "assets/images/starlord.png";
   }
 
   setupControls() {
@@ -64,7 +83,11 @@ class Player {
   }
 
   render() {
-    this.ctx.fillStyle = "#ddff00";
-    this.ctx.fillRect(this.x, this.y, this.width, this.height);
+    if (this.spriteLoaded) {
+      this.ctx.drawImage(this.sprite, this.x, this.y, this.width, this.height);
+    } else {
+      this.ctx.fillStyle = "#ddff00";
+      this.ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
   }
 }
