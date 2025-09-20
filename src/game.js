@@ -5,13 +5,18 @@ class Game {
     this.canvas = document.getElementById("canvas");
     this.ctx = this.canvas.getContext("2d");
 
-    this.startScreen = document.getElementById("startScreen");
+    this.overlayManager = new OverlayManager();
+
+    this.startScreen = this.overlayManager.getOverlay("start");
+    this.instructionsScreen = this.overlayManager.getOverlay("instructions");
+    this.pauseScreen = this.overlayManager.getOverlay("pause");
+    this.gameOverScreen = this.overlayManager.getOverlay("gameOver");
+
     this.startButton = document.getElementById("startButton");
     this.difficultyDropdown = document.getElementById("difficulty");
-    this.gameOverScreen = document.getElementById("gameOverScreen");
-    this.pauseScreen = document.getElementById("pauseScreen");
 
     this.player = null;
+    this.maze = null;
 
     this.animationId = null;
     this.lastTime = 0;
@@ -21,6 +26,7 @@ class Game {
 
   init() {
     this.setupEventListeners();
+    this.overlayManager.setupInstructionsListeners(this);
     this.showStartScreen();
   }
 
@@ -44,6 +50,12 @@ class Game {
           this.startGame();
         }
         break;
+      case "instructions":
+        if (e.code === "Escape") {
+          e.preventDefault();
+          this.hideInstructions();
+        }
+        break;
       case "playing":
         if (e.code === "Escape") {
           e.preventDefault();
@@ -57,18 +69,26 @@ class Game {
         }
         break;
       case "victory":
-        if (e.code === "Enter") {
+        if (e.code === "Space" || e.code === "Enter") {
           e.preventDefault();
-          this.restartGame();
+          this.cleanup();
+          this.startGame();
+        }
+        if (e.code === "Escape") {
+          e.preventDefault();
+          this.cleanup();
+          this.showStartScreen();
         }
         break;
       case "gameOver":
         if (e.code === "Space" || e.code === "Enter") {
           e.preventDefault();
-          this.restartGame();
+          this.cleanup();
+          this.startGame();
         }
         if (e.code === "Escape") {
           e.preventDefault();
+          this.cleanup();
           this.showStartScreen();
         }
         break;
@@ -83,7 +103,7 @@ class Game {
 
   startGame() {
     this.gameState = "playing";
-    this.hideAllScreens();
+    this.overlayManager.hideAllOverlays();
     this.initializeGameObjects();
     this.lastTime = performance.now();
     this.gameLoop();
@@ -91,7 +111,14 @@ class Game {
 
   initializeGameObjects() {
     this.difficulty = this.difficultyDropdown.value;
+
+    this.maze = new Maze(this.ctx, this.difficulty);
+
     this.player = new Player(this.ctx, this.difficulty);
+
+    const startPos = this.maze.getPlayerStartPosition();
+    this.player.x = startPos.x;
+    this.player.y = startPos.y;
   }
 
   pauseGame() {
@@ -103,9 +130,20 @@ class Game {
   resumeGame() {
     if (this.gameState !== "paused") return;
     this.gameState = "playing";
-    this.hideAllScreens();
+    this.overlayManager.hideAllOverlays();
     this.lastTime = performance.now();
     this.gameLoop();
+  }
+
+  victory() {
+    this.gameState = "victory";
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+    setTimeout(() => {
+      this.showVictoryScreen();
+    }, 1000);
   }
 
   gameOver() {
@@ -131,6 +169,7 @@ class Game {
       this.animationId = null;
     }
     this.player = null;
+    this.maze = null;
   }
 
   gameLoop(currentTime = 0) {
@@ -145,20 +184,90 @@ class Game {
     this.animationId = requestAnimationFrame((time) => this.gameLoop(time));
   }
 
+  overlapsRect(px, py, pw, ph, rx, ry, rw, rh) {
+    return !(px + pw <= rx || px >= rx + rw || py + ph <= ry || py >= ry + rh);
+  }
+
   update(deltaTime) {
     if (this.player && this.player.update) {
+      const prevX = this.player.x;
+      const prevY = this.player.y;
+
       this.player.update(deltaTime);
+
+      if (
+        this.maze &&
+        this.maze.checkCollision(
+          this.player.x,
+          this.player.y,
+          this.player.width,
+          this.player.height
+        )
+      ) {
+        this.player.x = prevX;
+        this.player.y = prevY;
+      } else {
+        const overlapsExit = this.overlapsRect(
+          this.player.x,
+          this.player.y,
+          this.player.width,
+          this.player.height,
+          this.maze.exit.x,
+          this.maze.exit.y,
+          this.maze.exit.width,
+          this.maze.exit.height
+        );
+        if (overlapsExit) {
+          const dx = this.player.x - prevX;
+          const dy = this.player.y - prevY;
+          let block = false;
+          switch (this.maze.exit.side) {
+            case 0:
+              if (dy > 0) block = true;
+              break;
+            case 1:
+              if (dx < 0) block = true;
+              break;
+            case 2:
+              if (dy < 0) block = true;
+              break;
+            case 3:
+              if (dx > 0) block = true;
+              break;
+          }
+          if (block) {
+            this.player.x = prevX;
+            this.player.y = prevY;
+          }
+        }
+      }
+
+      if (
+        this.maze &&
+        this.maze.canWin(
+          this.player.x,
+          this.player.y,
+          this.player.width,
+          this.player.height
+        )
+      ) {
+        this.victory();
+      }
     }
   }
 
   render() {
     this.ctx.save();
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-    this.ctx.fillStyle = "black";
+    this.ctx.fillStyle = "#1a1a1a";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.restore();
 
-    this.ctx.strokeStyle = "#ccc9c9ff";
+    if (this.maze && this.maze.render) {
+      this.maze.render();
+    }
+
+    this.ctx.strokeStyle = "#b0aeaeff";
     this.ctx.lineWidth = 2;
     const borderOffset = 10;
     this.ctx.strokeRect(
@@ -176,10 +285,8 @@ class Game {
   showStartScreen() {
     this.gameState = "start";
     this.setGameDifficulty();
-    this.hideAllScreens();
-    if (this.startScreen) {
-      this.startScreen.classList.remove("hidden");
-    }
+    this.overlayManager.hideAllOverlays();
+    this.overlayManager.showOverlay("start");
   }
 
   setGameDifficulty() {
@@ -202,26 +309,25 @@ class Game {
   }
 
   showPauseScreen() {
-    if (this.pauseScreen) {
-      this.pauseScreen.classList.remove("hidden");
-    }
+    this.overlayManager.showPause();
+  }
+
+  showVictoryScreen() {
+    this.overlayManager.showVictory();
   }
 
   showGameOverScreen() {
-    if (this.gameOverScreen) {
-      this.gameOverScreen.classList.remove("hidden");
-    }
+    this.overlayManager.showGameOver();
   }
 
-  hideAllScreens() {
-    if (this.startScreen) {
-      this.startScreen.classList.add("hidden");
-    }
-    if (this.pauseScreen) {
-      this.pauseScreen.classList.add("hidden");
-    }
-    if (this.gameOverScreen) {
-      this.gameOverScreen.classList.add("hidden");
-    }
+  showInstructions() {
+    this.gameState = "instructions";
+    this.overlayManager.showOverlay("start");
+    this.overlayManager.showOverlay("instructions");
+  }
+
+  hideInstructions() {
+    this.gameState = "start";
+    this.overlayManager.hideOverlay("instructions");
   }
 }
