@@ -4,8 +4,8 @@ class Player {
     this.difficulty = difficulty;
     this.x = 100;
     this.y = 100;
-    this.width = 20;
-    this.height = 20;
+    this.width = 18;
+    this.height = 18;
     this.speed = 200;
     this.keys = {};
 
@@ -19,8 +19,8 @@ class Player {
   loadSprite() {
     this.sprite.onload = () => {
       this.spriteLoaded = true;
-      this.width = 30;
-      this.height = 30;
+      this.width = 18;
+      this.height = 18;
     };
 
     this.sprite.onerror = () => {
@@ -45,17 +45,14 @@ class Player {
     let dt;
 
     switch (this.difficulty) {
-      case "easy":
-        dt = deltaTime / 1300;
-        break;
-      case "normal":
-        dt = deltaTime / 1700;
+      case ("easy", "normal"):
+        dt = deltaTime / 2000;
         break;
       case "hard":
-        dt = deltaTime / 2300;
+        dt = deltaTime / 2200;
         break;
       default:
-        dt = deltaTime / 1700;
+        dt = deltaTime / 2000;
     }
 
     if (this.keys["ArrowUp"] || this.keys["KeyW"]) {

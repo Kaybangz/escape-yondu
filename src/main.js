@@ -55,7 +55,7 @@ canvas.height = ORIGINAL_HEIGHT;
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-let gameManager;
+let game;
 document.addEventListener("DOMContentLoaded", () => {
   game = new Game();
 });

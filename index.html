@@ -5,46 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Escape Yondu</title>
     <link rel="stylesheet" href="styles/index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <main class="canvas-container">
-      <!-- Start Screen Overlay -->
-      <div id="startScreen" class="start-screen">
-        <div class="content-wrapper">
-          <h1 class="game-title">ESCAPE YONDU</h1>
-          <p class="game-subtitle">
-            Navigate through the maze and avoid the arrow at all cost.<br />
-            Can you escape Yondu's wrath?
-          </p>
-          <div class="actions">
-            <button id="startButton" class="start-button">Start Game</button>
-            <div class="difficulty-select">
-              <label for="difficulty">Choose difficulty:</label>
-              <select name="difficulty" id="difficulty"></select>
-            </div>
-            <a href="" class="instructions-link">Instructions</a>
-          </div>
-        </div>
-      </div>
-      <!-- Pause Screen Overlay -->
-      <div id="pauseScreen" class="pause-screen hidden">
-        <div>
-          <h2>PAUSED</h2>
-          <p>Press <span>ESC</span> or <span>SPACE</span> to resume</p>
-        </div>
-      </div>
-      <!-- Game Over Screen Overlay -->
-      <div id="gameOverScreen" class="game-over-screen hidden">
-        <div>
-          <h2>GAME OVER</h2>
-          <p>
-            Press <span>SPACE</span> to restart or <span>ESC</span> for main
-            menu
-          </p>
-        </div>
-      </div>
       <canvas id="canvas"></canvas>
     </main>
+    <script defer src="src/overlays.js"></script>
+    <script defer src="src/maze-generator.js"></script>
+    <script defer src="src/maze.js"></script>
     <script defer src="src/player.js"></script>
     <script defer src="src/game.js"></script>
     <script defer src="src/main.js"></script>
