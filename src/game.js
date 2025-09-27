@@ -17,6 +17,7 @@ class Game {
 
     this.player = null;
     this.maze = null;
+    this.arrow = null;
 
     this.animationId = null;
     this.lastTime = 0;
@@ -119,6 +120,8 @@ class Game {
     const startPos = this.maze.getPlayerStartPosition();
     this.player.x = startPos.x;
     this.player.y = startPos.y;
+
+    this.arrow = new Arrow(this.ctx, this.maze, this.difficulty);
   }
 
   pauseGame() {
@@ -170,6 +173,7 @@ class Game {
     }
     this.player = null;
     this.maze = null;
+    this.arrow = null;
   }
 
   gameLoop(currentTime = 0) {
@@ -254,6 +258,21 @@ class Game {
         this.victory();
       }
     }
+
+    if (this.arrow && this.player) {
+      this.arrow.update(deltaTime, this.player.x, this.player.y);
+
+      if (
+        this.arrow.checkCollision(
+          this.player.x,
+          this.player.y,
+          this.player.width,
+          this.player.height
+        )
+      ) {
+        this.gameOver();
+      }
+    }
   }
 
   render() {
@@ -279,6 +298,10 @@ class Game {
 
     if (this.player && this.player.render) {
       this.player.render();
+    }
+
+    if (this.arrow && this.arrow.render) {
+      this.arrow.render();
     }
   }
 

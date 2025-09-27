@@ -118,9 +118,9 @@ class OverlayManager {
           <div class="instruction-section">
             <h3>Tips</h3>
             <ul>
-              <li>Use the ESCAPE key to pause if you need a break</li>
+              <li>You have a five seconds head start, use it to your advantage</li>
               <li>Study the maze layout before rushing to the exit</li>
-              <li>Take your time on harder difficulties</li>
+              <li>Use the pause feature if you need a break</li>
             </ul>
           </div>
         </div>
@@ -213,14 +213,14 @@ class OverlayManager {
     this.updateOverlayContent("gameOver", {
       title: "VICTORY!",
       message:
-        "You escaped! Press <span>SPACE</span> to go to next level or <span>ESC</span> for main menu",
+        "Press <span>SPACE</span> to play again or <span>ESC</span> for main menu",
     });
     this.showOverlay("gameOver");
   }
 
   showGameOver() {
     this.updateOverlayContent("gameOver", {
-      title: "GAME OVER",
+      title: "YOU GOT CAUGHT!",
       message:
         "Press <span>SPACE</span> to play again or <span>ESC</span> for main menu",
     });
