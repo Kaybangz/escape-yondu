@@ -50,10 +50,15 @@ class Game {
   }
 
   setupMobileUI() {
-    if (this.isMobile) {
-      this.createMobileControlsHTML();
+    if (!this.isMobile) {
+      return;
+    }
 
+    this.createMobileControlsHTML();
+
+    if (!this.mobileButtonsInitialized) {
       this.setupMobileButtons();
+      this.mobileButtonsInitialized = true;
     }
   }
 
@@ -184,10 +189,14 @@ class Game {
   }
 
   handleResize() {
+    const wasMobile = this.isMobile;
     this.isMobile = this.detectMobile();
 
     if (this.isMobile) {
       this.setupMobileUI();
+    } else if (wasMobile) {
+      this.hideMobileControls();
+      this.hideMobileOverlayControls();
     }
   }
 

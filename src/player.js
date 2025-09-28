@@ -106,13 +106,13 @@ class Player {
     setupTouchEvents(dpadLeft, "left");
     setupTouchEvents(dpadRight, "right");
 
-    document.addEventListener(
-      "touchmove",
-      (e) => {
+    const blockDefault = (e) => {
+      if (e.target.closest(".dpad-up, .dpad-down, .dpad-left, .dpad-right")) {
         e.preventDefault();
-      },
-      { passive: false }
-    );
+      }
+    };
+
+    document.addEventListener("touchmove", blockDefault, { passive: false });
 
     document.addEventListener(
       "touchstart",

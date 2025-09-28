@@ -157,7 +157,10 @@ class OverlayManager {
     const isMobile =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent
-      ) || window.innerWidth <= 768;
+      ) ||
+      navigator.maxTouchPoints > 1 ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.innerWidth <= 768;
 
     if (isMobile) {
       pauseScreen.innerHTML = `

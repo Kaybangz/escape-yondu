@@ -4,7 +4,9 @@ class Arrow {
     this.maze = maze;
 
     this.width = 22;
-    this.height = 0.5;
+    this.height = 3;
+    this.visualThickness = 0.5;
+
     this.x = 0;
     this.y = 0;
 
@@ -376,7 +378,7 @@ class Arrow {
 
   drawYakaArrow() {
     const arrowLength = this.width;
-    const arrowWidth = this.height;
+    const arrowWidth = this.visualThickness ?? this.height;
 
     this.ctx.shadowColor = "#c90707ab";
     this.ctx.shadowBlur = 8;
