@@ -74,8 +74,9 @@ class OverlayManager {
             <h3>Objective</h3>
             <p>Navigate through the maze to reach the exit while avoiding Yondu's deadly arrow. Your goal is to escape alive!</p>
           </div>
+
           <div class="instruction-section">
-            <h3>Controls</h3>
+            <h3>Desktop Controls</h3>
             <div class="controls-grid">
               <div class="control-item">
                 <kbd>W</kbd> <kbd>↑</kbd>
@@ -101,10 +102,20 @@ class OverlayManager {
           </div>
 
           <div class="instruction-section">
+            <h3>Mobile Controls</h3>
+            <ul>
+              <li><strong>Use D-Pad to Move:</strong> Simply use the d-pad to move the character</li>
+              <li><strong>Lift to Stop:</strong> Lift your finger from the d-pad to stop moving</li>
+              <li><strong>Landscape Mode:</strong> For the best experience, rotate your device to landscape orientation</li>
+              <li><strong>Action Buttons:</strong> When the game ends, use the "Play Again" or "Main Menu" buttons that appear</li>
+            </ul>
+          </div>
+
+          <div class="instruction-section">
             <h3>Difficulty Levels</h3>
             <div class="difficulty-info">
               <div class="diff-item easy">
-                <strong>Easy:</strong> Wider corridors and more shortcuts. Great for beginners!
+                <strong>Easy:</strong> Wider corridors and more shortcuts. Great for beginners and mobile players!
               </div>
               <div class="diff-item normal">
                 <strong>Normal:</strong> Balanced challenge with some strategic shortcuts.
@@ -120,6 +131,7 @@ class OverlayManager {
             <ul>
               <li>You have a five seconds head start, use it to your advantage</li>
               <li>Study the maze layout before rushing to the exit</li>
+              <li>The game automatically pauses when you switch apps or tabs</li>
               <li>Use the pause feature if you need a break</li>
             </ul>
           </div>
@@ -142,12 +154,29 @@ class OverlayManager {
     pauseScreen.id = "pauseScreen";
     pauseScreen.className = "pause-screen hidden";
 
-    pauseScreen.innerHTML = `
-      <div>
-        <h2>PAUSED</h2>
-        <p>Press <span>ESC</span> or <span>SPACE</span> to resume</p>
-      </div>
-    `;
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth <= 768;
+
+    if (isMobile) {
+      pauseScreen.innerHTML = `
+        <div>
+          <h2>GAME PAUSED</h2>
+          <div class="mobile-overlay-buttons">
+            <button id="resumeGameButton" class="mobile-overlay-button">Resume Game</button>
+            <button id="pauseMainMenuButton" class="mobile-overlay-button">Main Menu</button>
+          </div>
+        </div>
+      `;
+    } else {
+      pauseScreen.innerHTML = `
+        <div>
+          <h2>GAME PAUSED</h2>
+          <p>Press <span>ESC</span> or <span>SPACE</span> to resume</p>
+        </div>
+      `;
+    }
 
     document.body.appendChild(pauseScreen);
     this.overlays.set("pause", pauseScreen);
@@ -158,12 +187,29 @@ class OverlayManager {
     gameOverScreen.id = "gameOverScreen";
     gameOverScreen.className = "game-over-screen hidden";
 
-    gameOverScreen.innerHTML = `
-      <div>
-        <h2>GAME OVER</h2>
-        <p>Press <span>SPACE</span> to play again or <span>ESC</span> for main menu</p>
-      </div>
-    `;
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth <= 768;
+
+    if (isMobile) {
+      gameOverScreen.innerHTML = `
+        <div>
+          <h2>GAME OVER</h2>
+          <div class="mobile-overlay-buttons">
+            <button id="playAgainButton" class="mobile-overlay-button">Play Again</button>
+            <button id="gameOverMainMenuButton" class="mobile-overlay-button">Main Menu</button>
+          </div>
+        </div>
+      `;
+    } else {
+      gameOverScreen.innerHTML = `
+        <div>
+          <h2>GAME OVER</h2>
+          <p>Press <span>SPACE</span> to play again or <span>ESC</span> for main menu</p>
+        </div>
+      `;
+    }
 
     document.body.appendChild(gameOverScreen);
     this.overlays.set("gameOver", gameOverScreen);
@@ -210,28 +256,64 @@ class OverlayManager {
   }
 
   showVictory() {
-    this.updateOverlayContent("gameOver", {
-      title: "VICTORY!",
-      message:
-        "Press <span>SPACE</span> to play again or <span>ESC</span> for main menu",
-    });
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth <= 768;
+
+    if (isMobile) {
+      this.updateOverlayContent("gameOver", {
+        title: "VICTORY!",
+        message: "",
+      });
+    } else {
+      this.updateOverlayContent("gameOver", {
+        title: "VICTORY!",
+        message:
+          "Press <span>SPACE</span> to play again or <span>ESC</span> for main menu",
+      });
+    }
     this.showOverlay("gameOver");
   }
 
   showGameOver() {
-    this.updateOverlayContent("gameOver", {
-      title: "YOU GOT CAUGHT!",
-      message:
-        "Press <span>SPACE</span> to play again or <span>ESC</span> for main menu",
-    });
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth <= 768;
+
+    if (isMobile) {
+      this.updateOverlayContent("gameOver", {
+        title: "YOU GOT CAUGHT!",
+        message: "",
+      });
+    } else {
+      this.updateOverlayContent("gameOver", {
+        title: "YOU GOT CAUGHT!",
+        message:
+          "Press <span>SPACE</span> to play again or <span>ESC</span> for main menu",
+      });
+    }
     this.showOverlay("gameOver");
   }
 
   showPause() {
-    this.updateOverlayContent("pause", {
-      title: "PAUSED",
-      message: "Press <span>ESC</span> or <span>SPACE</span> to resume",
-    });
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth <= 768;
+
+    if (isMobile) {
+      this.updateOverlayContent("pause", {
+        title: "GAME PAUSED",
+        message: "",
+      });
+    } else {
+      this.updateOverlayContent("pause", {
+        title: "GAME PAUSED",
+        message: "Press <span>ESC</span> or <span>SPACE</span> to resume",
+      });
+    }
     this.showOverlay("pause");
   }
 
@@ -260,6 +342,43 @@ class OverlayManager {
     if (backToMenu) {
       backToMenu.addEventListener("click", () => {
         game.hideInstructions();
+      });
+    }
+
+    this.setupMobileOverlayListeners(game);
+  }
+
+  setupMobileOverlayListeners(game) {
+    const resumeButton = document.getElementById("resumeGameButton");
+    if (resumeButton) {
+      resumeButton.addEventListener("click", () => {
+        game.resumeGame();
+      });
+    }
+
+    const pauseMainMenuButton = document.getElementById("pauseMainMenuButton");
+    if (pauseMainMenuButton) {
+      pauseMainMenuButton.addEventListener("click", () => {
+        game.cleanup();
+        game.showStartScreen();
+      });
+    }
+
+    const playAgainButton = document.getElementById("playAgainButton");
+    if (playAgainButton) {
+      playAgainButton.addEventListener("click", () => {
+        game.cleanup();
+        game.startGame();
+      });
+    }
+
+    const gameOverMainMenuButton = document.getElementById(
+      "gameOverMainMenuButton"
+    );
+    if (gameOverMainMenuButton) {
+      gameOverMainMenuButton.addEventListener("click", () => {
+        game.cleanup();
+        game.showStartScreen();
       });
     }
   }

@@ -1,11 +1,10 @@
 class Arrow {
-  constructor(ctx, maze, difficulty) {
+  constructor(ctx, maze) {
     this.ctx = ctx;
     this.maze = maze;
-    this.difficulty = difficulty;
 
-    this.width = 20;
-    this.height = 3;
+    this.width = 22;
+    this.height = 0.5;
     this.x = 0;
     this.y = 0;
 
@@ -93,7 +92,7 @@ class Arrow {
 
     this.moveAlongPath(deltaTime / 1000);
 
-    this.updateRotation(deltaTime / 1000);
+    this.updateRotation(deltaTime / 800);
 
     this.updateEnergyTrail();
   }
@@ -382,7 +381,7 @@ class Arrow {
     this.ctx.shadowColor = "#c90707ab";
     this.ctx.shadowBlur = 8;
 
-    this.ctx.fillStyle = "#c4581ab6";
+    this.ctx.fillStyle = "#c4341ab6";
     this.ctx.beginPath();
     this.ctx.moveTo(arrowLength / 2, 0);
     this.ctx.lineTo(-arrowLength / 4, -arrowWidth / 2);

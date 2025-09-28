@@ -5,6 +5,8 @@ class Game {
     this.canvas = document.getElementById("canvas");
     this.ctx = this.canvas.getContext("2d");
 
+    this.isMobile = this.detectMobile();
+
     this.overlayManager = new OverlayManager();
 
     this.startScreen = this.overlayManager.getOverlay("start");
@@ -14,6 +16,11 @@ class Game {
 
     this.startButton = document.getElementById("startButton");
     this.difficultyDropdown = document.getElementById("difficulty");
+
+    this.mobileControls = document.querySelector(".mobile-controls");
+    this.mobileOverlayControls = document.querySelector(
+      ".mobile-overlay-controls"
+    );
 
     this.player = null;
     this.maze = null;
@@ -25,10 +32,127 @@ class Game {
     this.init();
   }
 
+  detectMobile() {
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) ||
+      window.innerWidth <= 768 ||
+      "ontouchstart" in window
+    );
+  }
+
   init() {
     this.setupEventListeners();
+    this.setupMobileUI();
     this.overlayManager.setupInstructionsListeners(this);
     this.showStartScreen();
+  }
+
+  setupMobileUI() {
+    if (this.isMobile) {
+      this.createMobileControlsHTML();
+
+      this.setupMobileButtons();
+    }
+  }
+
+  createMobileControlsHTML() {
+    if (document.querySelector(".mobile-controls")) {
+      return;
+    }
+
+    const mobileControlsHTML = `
+      <div class="mobile-controls">
+        <div class="virtual-dpad">
+          <div class="dpad-container">
+            <div class="dpad-button dpad-up">↑</div>
+            <div class="dpad-button dpad-down">↓</div>
+            <div class="dpad-button dpad-left">←</div>
+            <div class="dpad-button dpad-right">→</div>
+          </div>
+        </div>
+        <div class="mobile-game-buttons">
+          <button class="mobile-btn pause" id="mobilePause">⏸</button>
+        </div>
+      </div>
+    `;
+
+    const canvasContainer = document.querySelector(".canvas-container");
+    if (canvasContainer) {
+      canvasContainer.insertAdjacentHTML("beforeend", mobileControlsHTML);
+
+      this.mobileControls = document.querySelector(".mobile-controls");
+      this.mobileOverlayControls = document.querySelector(
+        ".mobile-overlay-controls"
+      );
+    }
+  }
+
+  setupMobileButtons() {
+    const pauseBtn = document.getElementById("mobilePause");
+    const menuBtn = document.getElementById("mobileMenu");
+    const replayBtn = document.getElementById("mobileReplay");
+    const backBtn = document.getElementById("mobileBack");
+
+    if (pauseBtn) {
+      pauseBtn.addEventListener("click", () => {
+        if (this.gameState === "playing") {
+          this.pauseGame();
+        } else if (this.gameState === "paused") {
+          this.resumeGame();
+        }
+      });
+    }
+
+    if (menuBtn) {
+      menuBtn.addEventListener("click", () => {
+        this.cleanup();
+        this.showStartScreen();
+      });
+    }
+
+    if (replayBtn) {
+      replayBtn.addEventListener("click", () => {
+        if (this.gameState === "victory" || this.gameState === "gameOver") {
+          this.cleanup();
+          this.startGame();
+        }
+      });
+    }
+
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        if (this.gameState === "victory" || this.gameState === "gameOver") {
+          this.cleanup();
+          this.showStartScreen();
+        }
+      });
+    }
+  }
+
+  showMobileControls() {
+    if (this.isMobile && this.mobileControls) {
+      this.mobileControls.classList.add("active");
+    }
+  }
+
+  hideMobileControls() {
+    if (this.mobileControls) {
+      this.mobileControls.classList.remove("active");
+    }
+  }
+
+  showMobileOverlayControls() {
+    if (this.isMobile && this.mobileOverlayControls) {
+      this.mobileOverlayControls.classList.add("active");
+    }
+  }
+
+  hideMobileOverlayControls() {
+    if (this.mobileOverlayControls) {
+      this.mobileOverlayControls.classList.remove("active");
+    }
   }
 
   setupEventListeners() {
@@ -41,6 +165,36 @@ class Game {
     document.addEventListener("keydown", (e) => this.handleMenuKeys(e));
     this.canvas.addEventListener("contextmenu", (e) => e.preventDefault());
     window.addEventListener("blur", () => this.handleWindowBlur());
+
+    window.addEventListener("orientationchange", () => {
+      setTimeout(() => {
+        this.handleOrientationChange();
+      }, 100);
+    });
+
+    window.addEventListener("resize", () => {
+      this.handleResize();
+    });
+  }
+
+  handleOrientationChange() {
+    if (this.gameState === "playing") {
+      this.resizeCanvas();
+    }
+  }
+
+  handleResize() {
+    this.isMobile = this.detectMobile();
+
+    if (this.isMobile) {
+      this.setupMobileUI();
+    }
+  }
+
+  resizeCanvas() {
+    if (this.gameState === "playing") {
+      this.render();
+    }
   }
 
   handleMenuKeys(e) {
@@ -105,6 +259,8 @@ class Game {
   startGame() {
     this.gameState = "playing";
     this.overlayManager.hideAllOverlays();
+    this.hideMobileOverlayControls();
+    this.showMobileControls();
     this.initializeGameObjects();
     this.lastTime = performance.now();
     this.gameLoop();
@@ -127,6 +283,8 @@ class Game {
   pauseGame() {
     if (this.gameState !== "playing") return;
     this.gameState = "paused";
+    this.hideMobileControls();
+    this.showMobileOverlayControls();
     this.showPauseScreen();
   }
 
@@ -134,31 +292,36 @@ class Game {
     if (this.gameState !== "paused") return;
     this.gameState = "playing";
     this.overlayManager.hideAllOverlays();
+    this.hideMobileOverlayControls();
+    this.showMobileControls();
     this.lastTime = performance.now();
     this.gameLoop();
   }
 
   victory() {
     this.gameState = "victory";
+    this.hideMobileControls();
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
     }
     setTimeout(() => {
+      this.showMobileOverlayControls();
       this.showVictoryScreen();
     }, 1000);
   }
 
   gameOver() {
     this.gameState = "gameOver";
+    this.hideMobileControls();
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
     }
     setTimeout(() => {
+      this.showMobileOverlayControls();
       this.showGameOverScreen();
     }, 1000);
-    console.log("Game Over!");
   }
 
   restartGame() {
@@ -171,6 +334,8 @@ class Game {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
     }
+    this.hideMobileControls();
+    this.hideMobileOverlayControls();
     this.player = null;
     this.maze = null;
     this.arrow = null;
@@ -309,6 +474,8 @@ class Game {
     this.gameState = "start";
     this.setGameDifficulty();
     this.overlayManager.hideAllOverlays();
+    this.hideMobileControls();
+    this.hideMobileOverlayControls();
     this.overlayManager.showOverlay("start");
   }
 
