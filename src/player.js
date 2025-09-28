@@ -126,7 +126,7 @@ class Player {
   }
 
   update(deltaTime) {
-    let dt = deltaTime / 2000;
+    let dt = deltaTime / 2450;
 
     let moveUp = this.keys["ArrowUp"] || this.keys["KeyW"];
     let moveDown = this.keys["ArrowDown"] || this.keys["KeyS"];
