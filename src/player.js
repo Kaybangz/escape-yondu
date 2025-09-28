@@ -9,11 +9,19 @@ class Player {
     this.speed = 200;
     this.keys = {};
 
+    this.touchControls = {
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+    };
+
     this.sprite = new Image();
     this.spriteLoaded = false;
 
     this.loadSprite();
     this.setupControls();
+    this.setupMobileControls();
   }
 
   loadSprite() {
@@ -41,30 +49,105 @@ class Player {
     });
   }
 
+  setupMobileControls() {
+    const dpadUp = document.querySelector(".dpad-up");
+    const dpadDown = document.querySelector(".dpad-down");
+    const dpadLeft = document.querySelector(".dpad-left");
+    const dpadRight = document.querySelector(".dpad-right");
+
+    const setupTouchEvents = (element, direction) => {
+      if (!element) return;
+
+      element.addEventListener(
+        "touchstart",
+        (e) => {
+          e.preventDefault();
+          this.touchControls[direction] = true;
+        },
+        { passive: false }
+      );
+
+      element.addEventListener(
+        "touchend",
+        (e) => {
+          e.preventDefault();
+          this.touchControls[direction] = false;
+        },
+        { passive: false }
+      );
+
+      element.addEventListener(
+        "touchcancel",
+        (e) => {
+          e.preventDefault();
+          this.touchControls[direction] = false;
+        },
+        { passive: false }
+      );
+
+      element.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        this.touchControls[direction] = true;
+      });
+
+      element.addEventListener("mouseup", (e) => {
+        e.preventDefault();
+        this.touchControls[direction] = false;
+      });
+
+      element.addEventListener("mouseleave", (e) => {
+        e.preventDefault();
+        this.touchControls[direction] = false;
+      });
+    };
+
+    setupTouchEvents(dpadUp, "up");
+    setupTouchEvents(dpadDown, "down");
+    setupTouchEvents(dpadLeft, "left");
+    setupTouchEvents(dpadRight, "right");
+
+    const blockDefault = (e) => {
+      if (e.target.closest(".dpad-up, .dpad-down, .dpad-left, .dpad-right")) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("touchmove", blockDefault, { passive: false });
+
+    document.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+  }
+
   update(deltaTime) {
-    let dt;
+    let dt = deltaTime / 2000;
 
-    switch (this.difficulty) {
-      case ("easy", "normal"):
-        dt = deltaTime / 2000;
-        break;
-      case "hard":
-        dt = deltaTime / 2200;
-        break;
-      default:
-        dt = deltaTime / 2000;
-    }
+    let moveUp = this.keys["ArrowUp"] || this.keys["KeyW"];
+    let moveDown = this.keys["ArrowDown"] || this.keys["KeyS"];
+    let moveLeft = this.keys["ArrowLeft"] || this.keys["KeyA"];
+    let moveRight = this.keys["ArrowRight"] || this.keys["KeyD"];
 
-    if (this.keys["ArrowUp"] || this.keys["KeyW"]) {
+    moveUp = moveUp || this.touchControls.up;
+    moveDown = moveDown || this.touchControls.down;
+    moveLeft = moveLeft || this.touchControls.left;
+    moveRight = moveRight || this.touchControls.right;
+
+    if (moveUp) {
       this.y -= this.speed * dt;
     }
-    if (this.keys["ArrowDown"] || this.keys["KeyS"]) {
+    if (moveDown) {
       this.y += this.speed * dt;
     }
-    if (this.keys["ArrowLeft"] || this.keys["KeyA"]) {
+    if (moveLeft) {
       this.x -= this.speed * dt;
     }
-    if (this.keys["ArrowRight"] || this.keys["KeyD"]) {
+    if (moveRight) {
       this.x += this.speed * dt;
     }
 
